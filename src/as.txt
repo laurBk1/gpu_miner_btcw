@@ -1,0 +1,56 @@
+Hello,
+
+I am currently working on the `gpu_miner_btcw` project, which is written in CUDA and runs only on NVIDIA GPUs.  
+I want to port it to **OpenCL** to make it compatible with **AMD GPUs**. I am seeking detailed guidance or best practices for the process. Here is my plan so far:
+
+1. **Analyze CUDA code**
+   - Identify all `.cu` files and functions using CUDA.
+   - Look for CUDA-specific constructs:
+     - Kernel functions: `__global__ void kernel_name(...)`
+     - Memory management: `cudaMalloc`, `cudaFree`
+     - Data transfers: `cudaMemcpy`
+     - Kernel launches: `kernel_name<<<grid, block>>>(...)`
+   - Note all external dependencies (e.g., Thrust, cuBLAS).
+
+2. **Set up OpenCL environment**
+   - Install AMD OpenCL or ROCm SDK.
+   - Test a small OpenCL program to ensure GPU is recognized.
+
+3. **Rewrite kernels in OpenCL**
+   - Move each CUDA kernel to a `.cl` file.
+   - Replace CUDA indexing with OpenCL functions:
+     ```c
+     // CUDA: threadIdx.x + blockIdx.x * blockDim.x
+     // OpenCL: get_global_id(0)
+     ```
+   - Convert `__global__` kernels to `__kernel`.
+
+4. **Replace CUDA host code**
+   - Memory allocation: `cudaMalloc` → `clCreateBuffer`
+   - Memory copy: `cudaMemcpy` → `clEnqueueReadBuffer` / `clEnqueueWriteBuffer`
+   - Kernel launch: `kernel<<<grid, block>>>(...)` → `clEnqueueNDRangeKernel`
+   - Create context and queue: `clGetPlatformIDs`, `clGetDeviceIDs`, `clCreateContext`, `clCreateCommandQueue`
+   - Compile OpenCL program: `clCreateProgramWithSource`, `clBuildProgram`
+
+5. **Adjust work sizes**
+   - Map CUDA grid/block sizes to OpenCL `global_work_size` and `local_work_size`.
+   - Test different local sizes (e.g., 256, 512) for AMD optimization.
+
+6. **Test and validate**
+   - Start with a small dataset.
+   - Verify correctness of the mined results.
+   - Profile kernels to optimize speed: `clGetEventProfilingInfo`.
+
+7. **Replace NVIDIA-specific dependencies**
+   - Remove Thrust or cuBLAS calls.
+   - Use OpenCL or CPU-side alternatives if needed.
+
+8. **Document everything**
+   - Keep a README with build instructions and required AMD driver/OpenCL version.
+
+**Questions / Guidance Needed:**
+- Are there common pitfalls when porting CUDA mining code to OpenCL?
+- Any example patterns for memory management or kernel conversion that I should follow?
+- Best practices for AMD GPU optimization in mining workloads?
+
+Thanks in advance for any tips, examples, or advice!
