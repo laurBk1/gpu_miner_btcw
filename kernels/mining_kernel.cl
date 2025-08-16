@@ -171,7 +171,7 @@ __kernel void btcw_miner(
         
         // Check if we found a valid hash (simplified difficulty check)
         // Looking for hash with leading zeros
-        if (final_hash[0] == 0 && final_hash[1] == 0 && final_hash[2] == 0) {
+        if (final_hash[0] == 0 && final_hash[1] == 0 && final_hash[2] < 16) {
             // Found a potential solution
             atomic_xchg(nonce_result, current_nonce);
         }

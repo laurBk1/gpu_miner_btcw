@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-#include <cstring>  // pentru strstr
+
 # Set the project name
 project(gpu_miner_opencl)
 

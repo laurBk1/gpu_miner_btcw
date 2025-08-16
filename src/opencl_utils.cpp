@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstring>
 
 OpenCLManager::OpenCLManager() : initialized(false), platform(nullptr), device(nullptr), 
                                  context(nullptr), queue(nullptr), program(nullptr), kernel(nullptr) {
@@ -71,7 +72,8 @@ bool OpenCLManager::initialize() {
     }
     
     // Create command queue
-    queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
+    cl_queue_properties props[] = { CL_QUEUE_PROPERTIES, CL_QUEUE_PROFILING_ENABLE, 0 };
+    queue = clCreateCommandQueueWithProperties(context, device, props, &err);
     if (err != CL_SUCCESS) {
         std::cerr << "Failed to create command queue: " << getErrorString(err) << std::endl;
         return false;

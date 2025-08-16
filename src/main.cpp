@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
     ocl.printDeviceInfo();
 
     // Load and compile kernel
-    std::string kernelSource = loadKernelSource("kernels/mining_kernel.cl");
+    std::string kernelSource = loadKernelSource("../kernels/mining_kernel.cl");
     if (kernelSource.empty()) {
         std::cerr << "Failed to load kernel source" << std::endl;
         return 1;
@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
     curs_set(FALSE);
 
     int prev_y, prev_x;
-    int curr_y, curr_x;
+    int curr_y = 0, curr_x = 0;
     getmaxyx(stdscr, prev_y, prev_x);
     mvprintw(0, 0, "Bitcoin-PoW OpenCL Miner v1.0.0\n");
 
@@ -174,7 +174,9 @@ int main(int argc, char* argv[]) {
             }
 
             // Read results
-            ocl.readBuffer(d_nonce_data, NONCE_SIZE_BYTES, const_cast<void*>(reinterpret_cast<const volatile void*>(&shared_data->nonce)));
+            if (shared_data) {
+                ocl.readBuffer(d_nonce_data, NONCE_SIZE_BYTES, const_cast<void*>(reinterpret_cast<const volatile void*>(&shared_data->nonce)));
+            }
             ocl.readBuffer(d_nonce4hashrate_data, NONCE_SIZE_BYTES, const_cast<void*>(reinterpret_cast<const volatile void*>(&nonce4hashrate)));
 
             // Update display
@@ -189,12 +191,12 @@ int main(int argc, char* argv[]) {
 
             if (shared_data && nonce_prev != shared_data->nonce) {
                 nonce_prev = shared_data->nonce;
-                mvprintw(2, 0, "Hash found - NONCE: %016llx\n", nonce_prev);
+                mvprintw(2, 0, "Hash found - NONCE: %016lx\n", nonce_prev);
             }
 
             if (shared_data) {
                 memcpy(&hash_no_sig, const_cast<void*>(reinterpret_cast<const volatile void*>(&shared_data->data[192])), 8);
-                mvprintw(4, 0, "Hash no sig low64: %016llx\n", hash_no_sig);
+                mvprintw(4, 0, "Hash no sig low64: %016lx\n", hash_no_sig);
 
                 if (hash_no_sig == 0) {
                     mvprintw(6, 0, "!!! NOT CONNECTED TO BTCW NODE WALLET !!!  ---> Make sure your wallet has at least 1 utxo.\n");

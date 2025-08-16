@@ -4,6 +4,12 @@
 
 echo "Building BTCW OpenCL Miner for AMD GPUs..."
 
+# Check if kernels directory exists
+if [ ! -d "kernels" ]; then
+    echo "Creating kernels directory..."
+    mkdir -p kernels
+fi
+
 # Create build directory
 mkdir -p build
 cd build
